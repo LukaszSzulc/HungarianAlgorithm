@@ -1,22 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HungarianAlgorithm
+﻿namespace HungarianAlgorithm
 {
-    public enum CoverType
-    {
-        Row,Column
-    }
-
-    public class Cover
-    {
-        public int Index { get; set; }
-
-        public CoverType CoverType { get; set; }
-    }
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     public class CoverWithLines
     {
@@ -32,16 +18,15 @@ namespace HungarianAlgorithm
             covered = new int[originalGraph.GetLength(0),originalGraph.GetLength(1)];
         }
 
-        public List<Tuple<int, int>> FindMinimumCost()
+        public List<Zero> FindMinimumCost()
         {
-            int numberOfCovers = 0;
             do
             {
                 ResetZeroCount();
                 CountZerosInRows();
                 CountZerosInColumns();
-                numberOfCovers = CoverZeros();
-                if (numberOfCovers == originalGraph.GetLength(0))
+                var numberOfCovers = CoverZeros();
+                if (LinesCoverWholeDimension(numberOfCovers))
                 {
                     break;
                 }
@@ -51,7 +36,14 @@ namespace HungarianAlgorithm
             }
             while (true);
 
-            return new List<Tuple<int, int>>();
+            var solution = FindSolution();
+           
+            return solution;
+        }
+
+        private bool LinesCoverWholeDimension(int numberOfCovers)
+        {
+            return numberOfCovers == originalGraph.GetLength(0);
         }
 
         private int CoverZeros()
@@ -109,7 +101,7 @@ namespace HungarianAlgorithm
                 {
                     if (covered[i, j] == 0)
                     {
-                        this.modifiedGraph[i + 1, j + 1]-= minimum;
+                        modifiedGraph[i + 1, j + 1] -= minimum;
                     }
 
                     if (covered[i, j] >= 2)
@@ -118,6 +110,65 @@ namespace HungarianAlgorithm
                     }
                 }
             }
+        }
+
+        private List<Zero> FindSolution()
+        {
+            var solution = new List<Zero>();
+            var wasCoveredMatrix = new bool[modifiedGraph.GetLength(0)-1, modifiedGraph.GetLength(1)-1];
+            List<Zero> listZerosToCover;
+            do
+            {
+                listZerosToCover = FindZerosInRows(wasCoveredMatrix);
+                var ordered = listZerosToCover.OrderBy(x => x.ZeroCount).FirstOrDefault();
+                if (ordered == null)
+                {
+                    break;
+                }
+
+                for (int i = 0; i < wasCoveredMatrix.GetLength(1); i++)
+                {
+                    wasCoveredMatrix[ordered.Index - 1, i] = true;
+                    wasCoveredMatrix[i, ordered.Column-1] = true;
+                }
+
+                solution.Add(ordered);
+                listZerosToCover.Remove(ordered);
+            }
+            while (listZerosToCover.Any());
+
+            foreach (var zero in solution)
+            {
+                zero.Column--;
+                zero.Index--;
+            }
+
+            return solution;
+        }
+
+        private List<Zero> FindZerosInRows(bool[,] wasCovered)
+        {
+            var listZerosToCover = new List<Zero>();
+            for (int i = 1; i < modifiedGraph.GetLength(0); i++)
+            {
+                var zero = new Zero();
+                zero.Index = i;
+                for (int j = 1; j < modifiedGraph.GetLength(1); j++)
+                {
+                    if (modifiedGraph[i, j] == 0 && !wasCovered[i - 1, j - 1])
+                    {
+                        zero.ZeroCount++;
+                        zero.Column = j;
+                    }
+                }
+
+                if (zero.ZeroCount > 0)
+                {
+                    listZerosToCover.Add(zero);
+                }
+            }
+
+            return listZerosToCover;
         }
 
         private void CountZerosInColumns()
@@ -259,7 +310,6 @@ namespace HungarianAlgorithm
             return minimum;
         }
 
-        
         private CoverType GetOrder(int iteration)
         {
             return iteration % 2 == 0 ? CoverType.Row : CoverType.Column;

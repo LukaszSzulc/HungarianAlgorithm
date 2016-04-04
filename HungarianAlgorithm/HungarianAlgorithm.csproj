@@ -40,9 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cover.cs" />
+    <Compile Include="CoverType.cs" />
     <Compile Include="CoverWithLines.cs" />
     <Compile Include="Reduce.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Zero.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

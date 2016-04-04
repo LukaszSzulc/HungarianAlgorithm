@@ -1,5 +1,7 @@
 ﻿namespace HungarianAlgorithmTests
 {
+    using System.Collections.Generic;
+
     using FluentAssertions;
 
     using HungarianAlgorithm;
@@ -24,13 +26,27 @@
         public void CovertWithMinimalLines()
         {
             var graph = CreateGraph();
+            var original = CreateGraph();
             var reduce = new Reduce(graph);
             reduce.ReduceInRows();
             var result = reduce.ReduceInColumns();
 
             var zeros = new CoverWithLines(result);
-            zeros.FindMinimumCost();
+            var solution = zeros.FindMinimumCost();
+            var sum = Sum(solution,original);
 
+            sum.Should().Be(15);
+        }
+
+        private int Sum(List<Zero> solution,int[,] graph)
+        {
+            int sum = 0;
+            foreach (var zero in solution)
+            {
+                sum += graph[zero.Index, zero.Column];
+            }
+
+            return sum;
         }
 
         private int[,] CreateGraph()
