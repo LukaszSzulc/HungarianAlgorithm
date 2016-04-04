@@ -310,9 +310,6 @@
             return minimum;
         }
 
-        private CoverType GetOrder(int iteration)
-        {
-            return iteration % 2 == 0 ? CoverType.Row : CoverType.Column;
-        }
+        private CoverType GetOrder(int iteration) => iteration % 2 == 0 ? CoverType.Row : CoverType.Column;
     }
 }
